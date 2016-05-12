@@ -1,4 +1,6 @@
 var xhr = require('xhr')
+var xhr2 = require('xhr2')
+var xtend = require('xtend')
 
 var Client = module.exports = function Client (opts) {
   if (!(this instanceof Client)) {
@@ -14,6 +16,10 @@ var Client = module.exports = function Client (opts) {
   }
 }
 
+if (typeof window !== 'undefined') {
+  window.GuestlistIO = Client
+}
+
 ////// utility methods //////
 
 Client.prototype.setAccessToken = function (token) {
@@ -25,11 +31,16 @@ Client.prototype.setAccessToken = function (token) {
 
 Client.prototype.send = function (opts, cb) {
   var self = this
+  var headers = xtend(self.headers)
+  if (opts.accessToken) {
+    headers.accessToken = opts.accessToken
+  }
   xhr({
     method: opts.method,
     uri: self.baseUrl + opts.uri,
-    headers: self.headers,
-    json: opts.body
+    headers: headers,
+    json: opts.body,
+    xhr: new xhr2()
   }, function (err, resp, body) {
     if (err) {
       return cb(err)
@@ -63,10 +74,15 @@ Client.prototype.registerUser = function (opts, cb) {
   })
 }
 
-Client.prototype.me = function (cb) {
+Client.prototype.me = function (opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
   this.send({
     method: 'get',
-    uri: '/me'
+    uri: '/me',
+    accessToken: opts.accessToken
   }, function (err, data) {
     if (err) return cb(err)
     cb(null, data.user)

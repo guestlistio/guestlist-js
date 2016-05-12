@@ -1,0 +1,24 @@
+<script src="../dist/guestlist.js"></script>
+
+<script>
+
+  var log = []
+
+  log.push('Initialize client')
+  var client = GuestlistIO()
+
+  log.push('Set access token')
+  api.setAccessToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1IjoiNzJmZjY3ZDctNWI3Yy00MWE2LWI3NmItNWE4NGNmM2JjNTBhIiwiZXhwIjoxNzc4NDE3MDgyLCJpYXQiOjE0NjMwNTcwODJ9.2K31-j19UxKvmAW-7BlEAyiG-INXPAtScGfwuLy1WVo')
+
+  log.push('Get user')
+  client.me(function (err, me) {
+    console.log(err, me)
+
+    var name = me.name
+
+    log.push('Hello ' + name + '!')
+
+    document.write(log.join('<br />'))
+  })
+
+</script>

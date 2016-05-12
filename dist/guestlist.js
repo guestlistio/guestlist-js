@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var xhr = require('xhr')
+var xhr2 = require('xhr2')
+var xtend = require('xtend')
 
 var Client = module.exports = function Client (opts) {
   if (!(this instanceof Client)) {
@@ -15,6 +17,10 @@ var Client = module.exports = function Client (opts) {
   }
 }
 
+if (typeof window !== 'undefined') {
+  window.GuestlistIO = Client
+}
+
 ////// utility methods //////
 
 Client.prototype.setAccessToken = function (token) {
@@ -26,11 +32,16 @@ Client.prototype.setAccessToken = function (token) {
 
 Client.prototype.send = function (opts, cb) {
   var self = this
+  var headers = xtend(self.headers)
+  if (opts.accessToken) {
+    headers.accessToken = opts.accessToken
+  }
   xhr({
     method: opts.method,
     uri: self.baseUrl + opts.uri,
-    headers: self.headers,
-    json: opts.body
+    headers: headers,
+    json: opts.body,
+    xhr: new xhr2()
   }, function (err, resp, body) {
     if (err) {
       return cb(err)
@@ -64,10 +75,15 @@ Client.prototype.registerUser = function (opts, cb) {
   })
 }
 
-Client.prototype.me = function (cb) {
+Client.prototype.me = function (opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
   this.send({
     method: 'get',
-    uri: '/me'
+    uri: '/me',
+    accessToken: opts.accessToken
   }, function (err, data) {
     if (err) return cb(err)
     cb(null, data.user)
@@ -84,7 +100,7 @@ Client.prototype.getUser = function (opts, cb) {
   })
 }
 
-},{"xhr":2}],2:[function(require,module,exports){
+},{"xhr":2,"xhr2":10,"xtend":11}],2:[function(require,module,exports){
 "use strict";
 var window = require("global/window")
 var once = require("once")
@@ -473,4 +489,9 @@ function extend() {
     return target
 }
 
-},{}]},{},[1]);
+},{}],10:[function(require,module,exports){
+module.exports = XMLHttpRequest;
+
+},{}],11:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"dup":9}]},{},[1]);
