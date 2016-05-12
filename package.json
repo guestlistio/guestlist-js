@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "browserify -e index.js -o dist/guestlist.js",
-    "test": "node test"
+    "test": "npm run build && node test"
   },
   "pre-push": [
-    "build",
     "test"
   ],
   "repository": {
