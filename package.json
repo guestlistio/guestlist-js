@@ -1,0 +1,39 @@
+{
+  "name": "guestlist-js",
+  "version": "1.0.0",
+  "description": "Guestlist.io JavaScript SDK",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -e index.js -o dist/guestlist.js",
+    "test": "node test"
+  },
+  "pre-push": [
+    "build",
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guestlistio/guestlist-js.git"
+  },
+  "keywords": [
+    "guestlist",
+    "rsvp",
+    "tickets",
+    "willcall"
+  ],
+  "author": "will123195",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/guestlistio/guestlist-js/issues"
+  },
+  "homepage": "https://github.com/guestlistio/guestlist-js#readme",
+  "dependencies": {
+    "xhr": "^2.2.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "pre-push": "^0.1.1",
+    "tape": "^4.5.1",
+    "xhr2": "^0.1.3"
+  }
+}
