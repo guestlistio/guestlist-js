@@ -2,6 +2,7 @@
 var xhr = require('xhr')
 var xhr2 = require('xhr2')
 var xtend = require('xtend')
+var querystring = require('querystring')
 
 var Client = module.exports = function Client (opts) {
   if (!(this instanceof Client)) {
@@ -30,15 +31,19 @@ Client.prototype.setAccessToken = function (token) {
   }
 }
 
-Client.prototype.send = function (opts, cb) {
+Client.prototype.request = function (opts, cb) {
   var self = this
   var headers = xtend(self.headers)
   if (opts.accessToken) {
-    headers.accessToken = opts.accessToken
+    headers['x-access-token'] = opts.accessToken
+  }
+  var qs = ''
+  if (opts.query) {
+    qs = '?' + querystring.stringify(opts.query)
   }
   xhr({
     method: opts.method,
-    uri: self.baseUrl + opts.uri,
+    uri: self.baseUrl + opts.uri + qs,
     headers: headers,
     json: opts.body,
     xhr: new xhr2()
@@ -48,59 +53,412 @@ Client.prototype.send = function (opts, cb) {
     }
     var ok = [200, 201]
     if (ok.indexOf(resp.statusCode) === -1) {
-      return cb(new Error(body.error.message))
+      return cb(body.error || body)
     }
     cb(null, body)
   })
 }
 
-////// endpoint methods //////
+////// user endpoints //////
 
 Client.prototype.authenticate = function (opts, cb) {
-  this.send({
+  this.request({
     method: 'post',
     uri: '/authenticate',
     body: opts
   }, cb)
 }
 
-Client.prototype.registerUser = function (opts, cb) {
-  this.send({
-    method: 'post',
-    uri: '/users',
-    body: opts
-  }, function (err, data) {
-    if (err) return cb(err)
-    cb(null, data.user)
-  })
-}
-
-Client.prototype.me = function (opts, cb) {
-  if (typeof opts === 'function') {
-    cb = opts
-    opts = {}
-  }
-  this.send({
-    method: 'get',
-    uri: '/me',
-    accessToken: opts.accessToken
-  }, function (err, data) {
-    if (err) return cb(err)
-    cb(null, data.user)
-  })
-}
-
 Client.prototype.getUser = function (opts, cb) {
-  this.send({
+  this.request({
     method: 'get',
     uri: '/users' + opts.userId
-  }, function (err, data) {
+  }, function (err, body) {
     if (err) return cb(err)
-    cb(null, data.user)
+    cb(null, body.user)
   })
 }
 
-},{"xhr":2,"xhr2":10,"xtend":11}],2:[function(require,module,exports){
+Client.prototype.me = function (cb) {
+  this.request({
+    method: 'get',
+    uri: '/me'
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.user)
+  })
+}
+
+Client.prototype.registerUser = function (data, cb) {
+  this.request({
+    method: 'post',
+    uri: '/users',
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.user)
+  })
+}
+
+////// account endpoints //////
+
+Client.prototype.createAccount = function (data, cb) {
+  this.request({
+    method: 'post',
+    uri: '/accounts',
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.account)
+  })
+}
+
+Client.prototype.getAccount = function (accountId, cb) {
+  this.request({
+    method: 'get',
+    uri: '/accounts/' + accountId
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.account)
+  })
+}
+
+Client.prototype.getAccounts = function (opts, cb) {
+  this.request({
+    method: 'get',
+    uri: '/accounts',
+    query: opts
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.accounts)
+  })
+}
+
+Client.prototype.getMyAccounts = function (opts, cb) {
+  this.request({
+    method: 'get',
+    uri: '/my/accounts',
+    query: opts
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.accounts)
+  })
+}
+
+Client.prototype.inviteEmail = function (opts, cb) {
+  this.request({
+    method: 'post',
+    uri: '/accounts/' + opts.accountId + '/invite',
+    body: opts
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body)
+  })
+}
+
+Client.prototype.modifyAccount = function (accountId, data, cb) {
+  this.request({
+    method: 'patch',
+    uri: '/accounts/' + accountId,
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.account)
+  })
+}
+
+////// event endpoints //////
+
+Client.prototype.createEvent = function (data, cb) {
+  this.request({
+    method: 'post',
+    uri: '/events',
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.event)
+  })
+}
+
+Client.prototype.createChildEvent = function (parentEventId, data, cb) {
+  this.request({
+    method: 'post',
+    uri: '/events/' + parentEventId + '/new-child',
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.event)
+  })
+}
+
+Client.prototype.getEvent = function (eventId, cb) {
+  this.request({
+    method: 'get',
+    uri: '/events/' + eventId
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.event)
+  })
+}
+
+Client.prototype.getEvents = function (opts, cb) {
+  this.request({
+    method: 'get',
+    uri: '/events',
+    query: opts
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.events)
+  })
+}
+
+Client.prototype.modifyEvent = function (eventId, data, cb) {
+  this.request({
+    method: 'patch',
+    uri: '/events/' + eventId,
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.event)
+  })
+}
+
+////// order endpoints //////
+
+Client.prototype.getOrder = function (orderId, cb) {
+  this.request({
+    method: 'get',
+    uri: '/orders/' + orderId
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.order)
+  })
+}
+
+Client.prototype.getOrders = function (opts, cb) {
+  this.request({
+    method: 'get',
+    uri: '/orders',
+    query: opts
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.orders)
+  })
+}
+
+Client.prototype.modifyOrder = function (orderId, data, cb) {
+  this.request({
+    method: 'patch',
+    uri: '/orders/' + orderId,
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.order)
+  })
+}
+
+Client.prototype.submitOrder = function (data, cb) {
+  this.request({
+    method: 'post',
+    uri: '/orders',
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.order)
+  })
+}
+
+Client.prototype.submitPayment = function (orderId, data, cb) {
+  this.request({
+    method: 'post',
+    uri: '/orders/' + orderId + '/payment',
+    body: data
+  }, function (err, body) {
+    if (err) return cb(err)
+    cb(null, body.order)
+  })
+}
+
+},{"querystring":4,"xhr":5,"xhr2":13,"xtend":14}],2:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+// If obj.hasOwnProperty has been overridden, then calling
+// obj.hasOwnProperty(prop) will break.
+// See: https://github.com/joyent/node/issues/1707
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+module.exports = function(qs, sep, eq, options) {
+  sep = sep || '&';
+  eq = eq || '=';
+  var obj = {};
+
+  if (typeof qs !== 'string' || qs.length === 0) {
+    return obj;
+  }
+
+  var regexp = /\+/g;
+  qs = qs.split(sep);
+
+  var maxKeys = 1000;
+  if (options && typeof options.maxKeys === 'number') {
+    maxKeys = options.maxKeys;
+  }
+
+  var len = qs.length;
+  // maxKeys <= 0 means that we should not limit keys count
+  if (maxKeys > 0 && len > maxKeys) {
+    len = maxKeys;
+  }
+
+  for (var i = 0; i < len; ++i) {
+    var x = qs[i].replace(regexp, '%20'),
+        idx = x.indexOf(eq),
+        kstr, vstr, k, v;
+
+    if (idx >= 0) {
+      kstr = x.substr(0, idx);
+      vstr = x.substr(idx + 1);
+    } else {
+      kstr = x;
+      vstr = '';
+    }
+
+    k = decodeURIComponent(kstr);
+    v = decodeURIComponent(vstr);
+
+    if (!hasOwnProperty(obj, k)) {
+      obj[k] = v;
+    } else if (isArray(obj[k])) {
+      obj[k].push(v);
+    } else {
+      obj[k] = [obj[k], v];
+    }
+  }
+
+  return obj;
+};
+
+var isArray = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+},{}],3:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+var stringifyPrimitive = function(v) {
+  switch (typeof v) {
+    case 'string':
+      return v;
+
+    case 'boolean':
+      return v ? 'true' : 'false';
+
+    case 'number':
+      return isFinite(v) ? v : '';
+
+    default:
+      return '';
+  }
+};
+
+module.exports = function(obj, sep, eq, name) {
+  sep = sep || '&';
+  eq = eq || '=';
+  if (obj === null) {
+    obj = undefined;
+  }
+
+  if (typeof obj === 'object') {
+    return map(objectKeys(obj), function(k) {
+      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+      if (isArray(obj[k])) {
+        return map(obj[k], function(v) {
+          return ks + encodeURIComponent(stringifyPrimitive(v));
+        }).join(sep);
+      } else {
+        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+      }
+    }).join(sep);
+
+  }
+
+  if (!name) return '';
+  return encodeURIComponent(stringifyPrimitive(name)) + eq +
+         encodeURIComponent(stringifyPrimitive(obj));
+};
+
+var isArray = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+function map (xs, f) {
+  if (xs.map) return xs.map(f);
+  var res = [];
+  for (var i = 0; i < xs.length; i++) {
+    res.push(f(xs[i], i));
+  }
+  return res;
+}
+
+var objectKeys = Object.keys || function (obj) {
+  var res = [];
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
+  }
+  return res;
+};
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
+exports.decode = exports.parse = require('./decode');
+exports.encode = exports.stringify = require('./encode');
+
+},{"./decode":2,"./encode":3}],5:[function(require,module,exports){
 "use strict";
 var window = require("global/window")
 var once = require("once")
@@ -321,7 +679,7 @@ function _createXHR(options) {
 
 function noop() {}
 
-},{"global/window":3,"is-function":4,"once":5,"parse-headers":8,"xtend":9}],3:[function(require,module,exports){
+},{"global/window":6,"is-function":7,"once":8,"parse-headers":11,"xtend":12}],6:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window;
@@ -334,7 +692,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -351,7 +709,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -372,7 +730,7 @@ function once (fn) {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -420,7 +778,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":4}],7:[function(require,module,exports){
+},{"is-function":7}],10:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -436,7 +794,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
   , isArray = function(arg) {
@@ -468,7 +826,7 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":6,"trim":7}],9:[function(require,module,exports){
+},{"for-each":9,"trim":10}],12:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -489,9 +847,9 @@ function extend() {
     return target
 }
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = XMLHttpRequest;
 
-},{}],11:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}]},{},[1]);
+},{}],14:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}]},{},[1]);
