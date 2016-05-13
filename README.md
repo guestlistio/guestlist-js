@@ -31,7 +31,35 @@ client.getEvents({
 
 ### Documentation
 
+#### Users
+
 - `authenticate(opts, cb)`
-- `getEvents(opts, cb)`
+- `getUser(opts, cb)`
 - `me(cb)`
-- coming soon...
+- `registerNewUser(data, cb)`
+
+#### Accounts
+
+- `createAccount(data, cb)`
+- `getAccount(accountId, cb)`
+- `getAccounts(opts, cb)`
+- `getMyAccounts(opts, cb)`
+- `inviteEmail(opts, cb)`
+- `modifyAccount(accountId, data, cb)`
+
+#### Events
+
+- `createEvent(data, cb)`
+- `createChildEvent(parentEventId, data, cb)`
+- `getEvent(eventId, cb)`
+- `getEvents(opts, cb)`
+- `getGuestlist(eventId, opts, cb)`
+- `modifyEvent(eventId, data, cb)`
+
+#### Orders & RSVPs
+
+- `getOrder(orderId, cb)`
+- `getOrders(opts, cb)`
+- `modifyOrder(orderId, data, cb)`
+- `submitNewOrder(data, cb)`
+- `submitPayment(orderId, data, cb)`
