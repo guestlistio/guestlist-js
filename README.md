@@ -19,7 +19,7 @@ client.setAccessToken(myAccessToken)
 client.getEvents({
   limit: 10
 }, function (err, events) {
-  !err || console.log(err)
+  !err && console.log(err)
   console.log(events)
 })
 ```
