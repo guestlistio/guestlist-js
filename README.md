@@ -36,7 +36,7 @@ client.getEvents({
 - `authenticate(opts, cb)`
 - `getUser(opts, cb)`
 - `me(cb)`
-- `registerNewUser(data, cb)`
+- `registerUser(data, cb)`
 
 #### Accounts
 
@@ -53,7 +53,6 @@ client.getEvents({
 - `createChildEvent(parentEventId, data, cb)`
 - `getEvent(eventId, cb)`
 - `getEvents(opts, cb)`
-- `getGuestlist(eventId, opts, cb)`
 - `modifyEvent(eventId, data, cb)`
 
 #### Orders & RSVPs
@@ -61,5 +60,5 @@ client.getEvents({
 - `getOrder(orderId, cb)`
 - `getOrders(opts, cb)`
 - `modifyOrder(orderId, data, cb)`
-- `submitNewOrder(data, cb)`
+- `submitOrder(data, cb)`
 - `submitPayment(orderId, data, cb)`
