@@ -1,8 +1,8 @@
 # guestlist-js
 
-[![Build Status](https://travis-ci.org/guestlistio/guestlist-js.svg?branch=master)](https://travis-ci.org/guestlistio/guestlist-js)
-
 ## Guestlist.io JavaScript SDK
+
+[![Build Status](https://travis-ci.org/guestlistio/guestlist-js.svg?branch=master)](https://travis-ci.org/guestlistio/guestlist-js)
 
 ### Install
 
