@@ -1,6 +1,6 @@
 # guestlist-js
 
-## Guestlist.io JavaScript SDK
+### Guestlist.io JavaScript SDK
 
 [![Build Status](https://travis-ci.org/guestlistio/guestlist-js.svg?branch=master)](https://travis-ci.org/guestlistio/guestlist-js)
 
