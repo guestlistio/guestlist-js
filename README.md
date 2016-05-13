@@ -4,7 +4,7 @@
 
 Browser and Node.js compatible.
 
-Full API documentation here: [[https://api.guestlist.io/doc]]
+Full API documentation here: https://api.guestlist.io/doc
 
 [![Build Status](https://travis-ci.org/guestlistio/guestlist-js.svg?branch=master)](https://travis-ci.org/guestlistio/guestlist-js)
 
